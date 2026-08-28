@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="wiki-page-title">NFC WIKI</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --sidebar-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --admin-color: #dc2626;
+            --code-bg: #f1f5f9;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex; height: 100vh; overflow: hidden;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        aside {
+            width: 260px; background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.02);
+            z-index: 10; flex-shrink: 0;
+        }
+        .sidebar-header {
+            padding: 20px; font-size: 1.25rem; font-weight: bold;
+            color: var(--primary-color); border-bottom: 1px solid var(--border-color);
+            display: flex; gap: 10px; align-items: center; cursor: pointer;
+        }
+        .wiki-logo {
+            width: 28px; height: 28px; background-color: #059669; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1rem;
+        }
+        .sidebar-menu-area {
+            padding: 15px; flex-grow: 1; display: flex; flex-direction: column; gap: 8px; overflow-y: auto;
+        }
+        .sidebar-menu-btn {
+            background: none; border: 1px solid var(--border-color); padding: 10px 12px;
+            border-radius: 6px; text-align: left; cursor: pointer; font-weight: 600; color: #475569;
+            transition: background 0.2s, color 0.2s; font-size: 0.9rem;
+        }
+        .sidebar-menu-btn:hover { background-color: #eff6ff; color: var(--primary-color); border-color: var(--primary-color); }
+        .sidebar-footer { padding: 15px; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; }
+        
+        main { flex-grow: 1; display: flex; flex-direction: column; background-color: #ffffff; overflow-y: auto; justify-content: space-between; }
+        .top-bar {
+            padding: 15px 25px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: #ffffff; position: sticky; top: 0; z-index: 5;
+            gap: 15px; flex-wrap: wrap;
+        }
+        
+        .search-container { position: relative; flex-grow: 1; min-width: 200px; max-width: 350px; }
+        .search-input {
+            width: 100%; padding: 8px 12px; border: 1px solid var(--border-color);
+            border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; margin: 0 !important;
+        }
+        .search-results {
+            position: absolute; top: 100%; left: 0; right: 0; background: white;
+            border: 1px solid var(--border-color); border-radius: 6px; margin-top: 4px;
+            max-height: 200px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: none; z-index: 20;
+        }
+        .search-item { padding: 8px 12px; cursor: pointer; font-size: 0.9rem; border-bottom: 1px solid var(--border-color); }
+        .search-item:hover { background-color: #eff6ff; color: var(--primary-color); }
+
+        .user-section { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; white-space: nowrap; }
+        .content-area { padding: 30px; max-width: 950px; margin: 0 auto; width: 100%; box-sizing: border-box; flex-grow: 1; }
+        
+        footer {
+            border-top: 1px solid var(--border-color); background-color: #f1f5f9;
+            padding: 20px 25px; font-size: 0.8rem; color: #64748b;
+            display: flex; align-items: center; gap: 15px; flex-wrap: wrap;
+        }
+        .footer-logo {
+            width: 35px; height: 35px; background-color: #059669; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.1rem; flex-shrink: 0;
+        }
+
+        .wiki-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; overflow-x: auto; }
+        .tab-btn { background: none; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; color: #64748b; padding: 5px 10px; white-space: nowrap; }
+        .tab-btn.active { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); }
+
+        input[type="text"], input[type="password"], select, textarea {
+            width: 100%; padding: 12px; border: 1px solid var(--border-color);
+            border-radius: 6px; font-size: 1rem; box-sizing: border-box; margin-bottom: 15px; font-family: inherit;
+            -webkit-user-select: text; -moz-user-select: text; user-select: text;
+        }
+        textarea { height: 300px; resize: vertical; line-height: 1.6; }
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .btn {
+            padding: 8px 14px; border: none; border-radius: 6px;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.2s; white-space: nowrap;
+        }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-secondary { background-color: #e2e8f0; color: #475569; }
+        .btn-secondary:hover { background-color: #cbd5e1; }
+        .btn-danger { background-color: #fee2e2; color: #dc2626; }
+        .btn-danger:hover { background-color: #fecaca; }
+        .btn-admin { background-color: #fee2e2; color: var(--admin-color); border: 1px solid var(--admin-color); }
+        .btn-success { background-color: #d1fae5; color: #047857; border: 1px solid #10b981; }
+        .btn-success:hover { background-color: #a7f3d0; }
+        
+        .wiki-view h1 { font-size: 2rem; margin-top: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; word-break: break-all; }
+        .wiki-view h2 { font-size: 1.4rem; margin-top: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
+        .wiki-view p { line-height: 1.7; color: #334155; word-break: break-all; }
+        .wiki-view code { background-color: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+        .wiki-view pre { background-color: var(--code-bg); padding: 15px; border-radius: 6px; overflow-x: auto; }
+        .wiki-view img { max-width: 100%; border-radius: 6px; margin: 10px 0; border: 1px solid var(--border-color); }
+        
+        .wiki-link { color: var(--primary-color); text-decoration: none; font-weight: 500; cursor: pointer; }
+        .wiki-link:hover { text-decoration: underline; }
+        .external-link { color: #0284c7; text-decoration: none; font-weight: 500; }
+        .external-link:hover { text-decoration: underline; }
+
+        .ip-tag { font-family: monospace; color: #64748b; font-size: 0.8rem; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; }
+        .admin-badge { background-color: var(--admin-color); color: white; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .protected-badge { background-color: #d97706; color: white; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 8px; }
+        .banned-badge { background-color: #64748b; color: white; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .history-item { padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 10px; background: #fff; font-size: 0.9rem; }
+
+        .image-upload-box {
+            background: var(--code-bg); border: 2px dashed var(--border-color); border-radius: 6px;
+            padding: 15px; text-align: center; margin-bottom: 15px;
+        }
+
+        .main-portal { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .portal-card { background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .portal-card h3 { margin-top: 0; border-bottom: 2px solid var(--primary-color); padding-bottom: 6px; color: var(--primary-color); font-size: 1.05rem; }
+        .ranking-list { list-style: none; padding: 0; margin: 0; }
+        .ranking-item { padding: 8px 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; font-size: 0.88rem; align-items: center; }
+        .ranking-item:last-child { border-bottom: none; }
+
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        .admin-table th, .admin-table td { border: 1px solid var(--border-color); padding: 8px; text-align: left; }
+        .admin-table th { background: var(--code-bg); }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;
+            padding: 20px; box-sizing: border-box;
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 8px; width: 100%; max-width: 650px; 
+            max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.15); box-sizing: border-box;
+        }
+
+        @media (max-width: 900px) {
+            .main-portal { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: auto; overflow: auto; }
+            aside { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border-color); }
+            main { height: auto; overflow: visible; }
+            .top-bar { padding: 12px 15px; flex-direction: column; align-items: stretch; }
+            .search-container { max-width: 100%; }
+            .content-area { padding: 20px 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="sidebar-header" onclick="goHome()">
+            <div class="wiki-logo" id="logo-text">N</div>
+            <span id="wiki-title-sidebar">NFC WIKI</span>
+        </div>
+        <div class="sidebar-menu-area">
+            <button class="sidebar-menu-btn" onclick="goHome()">🏠 대문으로 가기</button>
+            <button class="sidebar-menu-btn" onclick="openSpecialModal('manual')">📖 매뉴얼 및 기능 소개</button>
+            <button class="sidebar-menu-btn" onclick="openSpecialModal('policy')">📜 이용 방침 (상세 규정)</button>
+            <button class="sidebar-menu-btn" onclick="openSpecialModal('inquiry')">📞 문의 및 신고 센터</button>
+        </div>
+        <div class="sidebar-footer">
+            <button class="btn btn-primary" style="width: 100%;" onclick="createNewPage()">+ 새 문서 만들기</button>
+        </div>
+    </aside>
+
+    <main>
+        <div>
+            <div class="top-bar">
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" onclick="goBack()" title="뒤로가기">⬅️ 뒤로가기</button>
+                    <div id="action-buttons" style="display: flex; gap: 8px;"></div>
+                </div>
+                
+                <div class="search-container">
+                    <input type="text" id="wiki-search-input" class="search-input" placeholder="🔍 문서 검색..." oninput="handleSearch(event)" autocomplete="off">
+                    <div id="search-results-box" class="search-results"></div>
+                </div>
+
+                <div class="user-section" id="user-section"></div>
+            </div>
+            <div class="content-area">
+                <div class="wiki-tabs" id="wiki-tabs" style="display: none;">
+                    <button class="tab-btn active" id="tab-doc-btn" onclick="switchTab('document')">문서</button>
+                    <button class="tab-btn" id="tab-hist-btn" onclick="switchTab('history')">역사 (기록)</button>
+                </div>
+                <div id="content-container"></div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-logo" id="footer-logo-text">N</div>
+            <div>
+                <p style="margin: 0 0 4px 0;">
+                    이 저작물은 <b>CC BY-NC-SA 2.0 KR</b>에 따라 이용할 수 있습니다.<br>
+                    <span id="footer-wiki-name">NFC WIKI</span>는 백과사전입니다.
+                </p>
+            </div>
+        </footer>
+    </main>
+
+    <!-- 로그인 모달 -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content" style="max-width:350px;">
+            <h3 style="margin-top:0;">로그인</h3>
+            <input type="text" id="login-id" placeholder="아이디" maxlength="30">
+            <input type="password" id="login-pw" placeholder="비밀번호" maxlength="100">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                <button class="btn" style="background:none; color:var(--primary-color); padding:0; text-decoration:underline;" onclick="openFindModal()">🔑 아이디/비밀번호 찾기</button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" onclick="closeModals()">취소</button>
+                    <button class="btn btn-primary" onclick="processLogin()">로그인</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 회원가입 모달 -->
+    <div id="signup-modal" class="modal">
+        <div class="modal-content" style="max-width:380px;">
+            <h3 style="margin-top:0;">회원가입</h3>
+            <input type="text" id="signup-id" placeholder="아이디 (4자 이상)" maxlength="30">
+            <input type="password" id="signup-pw" placeholder="비밀번호 (6자 이상)" maxlength="100">
+            <input type="text" id="signup-nickname" placeholder="닉네임 (활동명)" maxlength="30">
+            
+            <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
+            <p style="font-size:0.8rem; color:#64748b; margin-top:0;">🔑 계정 찾기용 비밀번호 힌트 설정</p>
+            <input type="text" id="signup-question" placeholder="질문 (예: 가장 보물 1호는?)" maxlength="100">
+            <input type="text" id="signup-answer" placeholder="정답 (예: 내 노트북)" maxlength="100">
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+                <button class="btn btn-secondary" onclick="closeModals()">취소</button>
+                <button class="btn btn-primary" onclick="processSignup()">가입하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 아이디 / 비밀번호 찾기 모달 -->
+    <div id="find-modal" class="modal">
+        <div class="modal-content" style="max-width:400px;">
+            <h3 style="margin-top:0;">🔑 아이디 / 비밀번호 찾기</h3>
+            
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <button class="btn btn-primary" id="find-mode-id-btn" style="flex:1;" onclick="setFindMode('id')">아이디 찾기</button>
+                <button class="btn btn-secondary" id="find-mode-pw-btn" style="flex:1;" onclick="setFindMode('pw')">비밀번호 재설정</button>
+            </div>
+
+            <input type="text" id="find-nickname" placeholder="가입 시 닉네임 입력" maxlength="30">
+            <input type="text" id="find-id" placeholder="가입 시 아이디 입력" style="display:none;" maxlength="30">
+            <input type="text" id="find-answer" placeholder="비밀번호 힌트 정답 입력" maxlength="100">
+            
+            <input type="password" id="find-new-pw" placeholder="새로 사용할 비밀번호 (6자 이상)" style="display:none;" maxlength="100">
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+                <button class="btn btn-secondary" onclick="closeModals()">취소</button>
+                <button class="btn btn-primary" id="find-action-btn" onclick="processFind()">아이디 찾기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 특수 안내 모달 -->
+    <div id="special-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="special-modal-title" style="margin-top:0;">안내</h3>
+            <div id="special-modal-body" style="font-size: 0.95rem; line-height: 1.6; color: #334155; word-break: break-all;"></div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeModals()">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 관리자 대시보드 모달 -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top:0;">⚙️ 관리자 대시보드 및 권한 센터</h3>
+
+            <div style="background:#f0fdf4; padding:15px; border-radius:6px; margin-bottom:15px; border:1px solid #10b981;">
+                <h4 style="margin-top:0; color:#047857;">💾 위키 전체 데이터 백업 & 복구 센터</h4>
+                <p style="font-size:0.8rem; color:#065f46; margin-top:0;">백업 파일에는 보안을 위해 계정 비밀번호 해시 및 힌트 정답이 모두 안전하게 제거되어 추출됩니다.</p>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn btn-success" style="flex:1;" onclick="exportWikiData()">📥 안전한 백업 파일 다운로드 (.json)</button>
+                    <label class="btn btn-primary" style="flex:1; text-align:center; cursor:pointer;">
+                        📤 백업 파일 복구하기
+                        <input type="file" accept=".json" onchange="importWikiData(event)" style="display:none;">
+                    </label>
+                </div>
+            </div>
+
+            <div style="background:#fff; padding:15px; border-radius:6px; margin-bottom:15px; border:1px solid var(--admin-color);">
+                <h4 style="margin-top:0; color:var(--admin-color);">🔑 관리자 아이디 및 비밀번호 변경</h4>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:0.8rem; font-weight:bold;">새 아이디:</label>
+                        <input type="text" id="admin-new-id" style="margin-bottom:8px;" maxlength="30">
+                    </div>
+                    <div>
+                        <label style="font-size:0.8rem; font-weight:bold;">현재 비밀번호 확인:</label>
+                        <input type="password" id="admin-current-pw" style="margin-bottom:8px;" maxlength="100">
+                    </div>
+                </div>
+                <label style="font-size:0.8rem; font-weight:bold;">새 비밀번호 (변경 시에만 입력):</label>
+                <input type="password" id="admin-new-pw" style="margin-bottom:8px;" placeholder="변경할 새 비밀번호" maxlength="100">
+                <button class="btn btn-admin" style="width:100%;" onclick="changeAdminCredentials()">관리자 계정 정보 변경하기</button>
+            </div>
+
+            <div style="background:#f8fafc; padding:15px; border-radius:6px; margin-bottom:15px; border:1px solid var(--border-color);">
+                <h4 style="margin-top:0; color:var(--primary-color);">👥 회원 관리 및 관리자 권한 부여 / 제재</h4>
+                <div style="max-height: 180px; overflow-y: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>아이디</th>
+                                <th>닉네임</th>
+                                <th>권한/상태</th>
+                                <th>권한 및 제재 관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-user-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="background:#f8fafc; padding:15px; border-radius:6px; margin-bottom:15px; border:1px solid var(--border-color);">
+                <h4 style="margin-top:0; color:var(--primary-color);">🔒 일반 회원 권한 세부 설정</h4>
+                <label style="font-size:0.9rem; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="setting-allow-user-edit" style="width:auto; margin:0;">
+                    <b>일반 회원의 문서 수정 허용</b>
+                </label>
+                <br>
+                <label style="font-size:0.9rem; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="setting-allow-user-delete" style="width:auto; margin:0;">
+                    <b>일반 회원의 문서 삭제 허용</b>
+                </label>
+            </div>
+
+            <div style="background:#f8fafc; padding:12px; border-radius:6px; margin-bottom:15px; border:1px solid var(--border-color);">
+                <h4 style="margin-top:0;">🌐 위키 안내문 설정</h4>
+                <label style="font-size:0.85rem; font-weight:bold;">위키 이름:</label>
+                <input type="text" id="setting-wiki-name" style="margin-bottom:8px;" maxlength="50">
+                <label style="font-size:0.85rem; font-weight:bold;">대문 공지사항:</label>
+                <textarea id="setting-wiki-notice" style="height:50px; margin-bottom:8px;" maxlength="1000"></textarea>
+                <label style="font-size:0.85rem; font-weight:bold;">📖 매뉴얼 내용:</label>
+                <textarea id="setting-wiki-manual" style="height:50px; margin-bottom:8px;" maxlength="3000"></textarea>
+                <label style="font-size:0.85rem; font-weight:bold;">📜 이용 방침 내용:</label>
+                <textarea id="setting-wiki-policy" style="height:50px; margin-bottom:8px;" maxlength="3000"></textarea>
+                <label style="font-size:0.85rem; font-weight:bold;">📞 문의 센터 내용:</label>
+                <textarea id="setting-wiki-inquiry" style="height:50px; margin-bottom:8px;" maxlength="3000"></textarea>
+            </div>
+
+            <div style="display: flex; gap:10px; justify-content: flex-end; margin-top: 15px;">
+                <button class="btn btn-secondary" onclick="closeModals()">닫기</button>
+                <button class="btn btn-primary" onclick="saveWikiSettings()">설정 저장하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           0. 개발자 도구 차단 및 안티 디버깅 트랩 (강력 방어 시스템)
+           ========================================================================== */
+        
+        // 1) 키보드 단축키 차단 (F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+S 등)
+        document.addEventListener('keydown', function(e) {
+            if (
+                e.keyCode === 123 || 
+                (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
+                (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))
+            ) {
+                e.preventDefault();
+                e.stopPropagation();
+                alert('⚠️ 보안 정책에 의해 개발자 도구를 사용할 수 없습니다.');
+                return false;
+            }
+        }, true);
+
+        // 2) 마우스 우클릭 및 컨텍스트 메뉴 무력화
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        }, true);
+
+        // 3) 무한 디버거 트랩 (Anti-Debugging)
+        function antiDebugTrap() {
+            function debugLoop(counter) {
+                if (("" + counter / counter)["length"] !== 1 || counter === 0) {
+                    (function() {}["constructor"]("debugger")());
+                } else {
+                    (function() {}["constructor"]("debugger")());
+                }
+                debugLoop(++counter);
+            }
+            try {
+                debugLoop(0);
+            } catch (err) {
+                setTimeout(antiDebugTrap, 100);
+            }
+        }
+
+        // 4) F12 개발자 도구 실행 실시간 감지 (지연시간 및 창크기 변화 측정)
+        setInterval(function() {
+            const startTime = performance.now();
+            (function() {}["constructor"]("debugger")());
+            const endTime = performance.now();
+            
+            if (endTime - startTime > 100) {
+                window.location.reload();
+            }
+        }, 300);
+
+        // 백그라운드 디버그 트랩 구동
+        setTimeout(antiDebugTrap, 500);
+
+        /* ==========================================================================
+           1. 보안 및 암호화 엔진 (PBKDF2, Salt, HMAC 데이터 무결성 검증)
+           ========================================================================== */
+        
+        let systemHMACKey = localStorage.getItem('nfc_wiki_sys_key');
+        if (!systemHMACKey) {
+            systemHMACKey = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2, '0')).join('');
+            localStorage.setItem('nfc_wiki_sys_key', systemHMACKey);
+        }
+
+        function generateSalt() {
+            const arr = new Uint8Array(16);
+            crypto.getRandomValues(arr);
+            return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function hashPasswordPBKDF2(password, salt) {
+            const enc = new TextEncoder();
+            const keyMaterial = await crypto.subtle.importKey(
+                "raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits", "deriveKey"]
+            );
+            const derivedKey = await crypto.subtle.deriveKey(
+                {
+                    name: "PBKDF2",
+                    salt: enc.encode(salt),
+                    iterations: 100000,
+                    hash: "SHA-256"
+                },
+                keyMaterial,
+                { name: "HMAC", hash: "SHA-256", length: 256 },
+                true,
+                ["sign"]
+            );
+            const exported = await crypto.subtle.exportKey("raw", derivedKey);
+            return Array.from(new Uint8Array(exported)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function generateSignature(dataString) {
+            const enc = new TextEncoder();
+            const key = await crypto.subtle.importKey(
+                "raw", enc.encode(systemHMACKey), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+            );
+            const signature = await crypto.subtle.sign("HMAC", key, enc.encode(dataString));
+            return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function sanitizeHTML(str) {
+            if (typeof str !== 'string') return '';
+            return str.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
+        }
+
+        /* ==========================================================================
+           2. 상태 및 기본 설정 초기화
+           ========================================================================== */
+
+        const defaultSettings = {
+            name: "NFC WIKI",
+            notice: "• 환영합니다! NFC WIKI는 서버 비용 없이 무료로 운영됩니다.\n• 본 위키는 전문 운영 규정 및 매뉴얼을 준수합니다.",
+            manual: `[NFC WIKI 이용 매뉴얼 및 문법 가이드]\n\n1. 기본 문단 작성법\n- 대제목 (H2): == 문단 제목 ==\n\n2. 링크 및 이미지 삽입\n- 문서 내부 링크: [[문서제목|보여줄 텍스트]]\n- 외부 링크: [[http://주소|보여줄 이름]]\n- 이미지 첨부: 본문 편집 시 아래 [이미지 직접 업로드] 버튼 이용`,
+            policy: `[NFC WIKI 운영 및 편집 규정]\n\n제 1 장 총칙\n제 1 조 (목적) 본 규정은 NFC WIKI의 안정적인 운영을 목적으로 합니다.`,
+            inquiry: `[NFC WIKI 문의 및 신고 센터]\n\n1. 게시물 임시 조치 요청\n2. 부정 이용자 및 스팸 신고`,
+            allowUserEdit: false,
+            allowUserDelete: false
+        };
+
+        let wikiSettings = JSON.parse(localStorage.getItem('nfc_wiki_settings')) || defaultSettings;
+        let users = JSON.parse(localStorage.getItem('nfc_wiki_users')) || [];
+        let searchRankings = JSON.parse(localStorage.getItem('nfc_wiki_search_rankings')) || {};
+        
+        let currentUser = null;
+        let isAnonymous = JSON.parse(localStorage.getItem('nfc_wiki_anon')) || false;
+        
+        let userIp = localStorage.getItem('nfc_wiki_ip');
+        if (!userIp) {
+            userIp = `${Math.floor(Math.random()*150)+50}.${Math.floor(Math.random()*200)+1}.***.***`;
+            localStorage.setItem('nfc_wiki_ip', userIp);
+        }
+
+        const defaultPages = {
+            "NFC_개요": {
+                title: "NFC 개요",
+                content: `= NFC 개요 =\n\nNFC(Near Field Communication)는 근거리 무선 통신 기술입니다.`,
+                updated: new Date().toISOString(),
+                viewsToday: 15,
+                isAnonDoc: true,
+                isProtected: false,
+                history: [
+                    {
+                        version: 1,
+                        author: "익명(127.0.0.1)",
+                        date: new Date().toLocaleString(),
+                        content: `= NFC 개요 =\n\nNFC(Near Field Communication)는 근거리 무선 통신 기술입니다.`,
+                        summary: "최초 문서 생성"
+                    }
+                ]
+            }
+        };
+
+        let pages = JSON.parse(localStorage.getItem('nfc_wiki_pages')) || defaultPages;
+
+        let lastVisitDate = localStorage.getItem('nfc_wiki_date');
+        let currentDateStr = new Date().toDateString();
+        if (lastVisitDate !== currentDateStr) {
+            for (let key in pages) { pages[key].viewsToday = 0; }
+            localStorage.setItem('nfc_wiki_date', currentDateStr);
+            saveToStorage();
+        }
+
+        let currentPageKey = null;
+        let currentTab = 'document';
+        let isEditing = false;
+        let historyStack = [];
+        let findMode = 'id';
+
+        async function initAdmin() {
+            if (users.length === 0) {
+                const salt = generateSalt();
+                const hashedPw = await hashPasswordPBKDF2("admin1234", salt);
+                const answerSalt = generateSalt();
+                const hashedAnswer = await hashPasswordPBKDF2("관리자정답", answerSalt);
+
+                users.push({ 
+                    id: "admin", 
+                    pw: hashedPw, 
+                    salt: salt, 
+                    nickname: "관리자", 
+                    question: "관리자 질문", 
+                    answer: hashedAnswer, 
+                    answerSalt: answerSalt,
+                    isAdmin: true, 
+                    isBanned: false 
+                });
+                saveToStorage();
+            }
+            await validateSessionIntegrity();
+        }
+
+        async function validateSessionIntegrity() {
+            const rawSession = localStorage.getItem('nfc_wiki_session');
+            const storedSig = localStorage.getItem('nfc_wiki_session_sig');
+
+            if (rawSession && storedSig) {
+                const expectedSig = await generateSignature(rawSession);
+                if (storedSig !== expectedSig) {
+                    alert('⚠️ 세션 정보 위변조가 감지되어 로그아웃 처리됩니다.');
+                    logout();
+                    return;
+                }
+                const parsedUser = JSON.parse(rawSession);
+                const dbUser = users.find(u => u.id === parsedUser.id);
+                if (!dbUser || dbUser.isBanned) {
+                    logout();
+                    return;
+                }
+                currentUser = dbUser;
+            } else {
+                currentUser = null;
+            }
+        }
+
+        async function saveToStorage() {
+            localStorage.setItem('nfc_wiki_pages', JSON.stringify(pages));
+            localStorage.setItem('nfc_wiki_users', JSON.stringify(users));
+            localStorage.setItem('nfc_wiki_settings', JSON.stringify(wikiSettings));
+            localStorage.setItem('nfc_wiki_search_rankings', JSON.stringify(searchRankings));
+
+            if (currentUser) {
+                const sessionStr = JSON.stringify({ id: currentUser.id, nickname: currentUser.nickname, isAdmin: currentUser.isAdmin });
+                const sig = await generateSignature(sessionStr);
+                localStorage.setItem('nfc_wiki_session', sessionStr);
+                localStorage.setItem('nfc_wiki_session_sig', sig);
+            }
+        }
+
+        /* ==========================================================================
+           3. 안전한 데이터 백업 & 복구 (민감정보 제거)
+           ========================================================================== */
+
+        function exportWikiData() {
+            const sanitizedUsers = users.map(u => ({
+                id: u.id,
+                nickname: u.nickname,
+                question: u.question,
+                isAdmin: u.isAdmin,
+                isBanned: u.isBanned
+            }));
+
+            const backupData = {
+                version: "2.0-SECURE",
+                exportDate: new Date().toLocaleString(),
+                pages: pages,
+                users: sanitizedUsers,
+                settings: wikiSettings,
+                searchRankings: searchRankings
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `NFC_WIKI_SecureBackup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importWikiData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (!imported.pages || !imported.users || !imported.settings) {
+                        throw new Error('올바른 백업 파일 형식이 아닙니다.');
+                    }
+
+                    if (confirm('⚠️ 기존 데이터를 복구합니까? 복구 후 관리자 및 기존 계정은 초기 비밀번호 설정이 필요할 수 있습니다.')) {
+                        pages = imported.pages;
+                        wikiSettings = imported.settings;
+                        searchRankings = imported.searchRankings || {};
+
+                        users = await Promise.all(imported.users.map(async u => {
+                            const tempSalt = generateSalt();
+                            const tempPw = await hashPasswordPBKDF2("reset1234!", tempSalt);
+                            return {
+                                ...u,
+                                pw: u.pw || tempPw,
+                                salt: u.salt || tempSalt,
+                                answer: u.answer || "",
+                                answerSalt: u.answerSalt || tempSalt
+                            };
+                        }));
+
+                        saveToStorage();
+                        alert('🎉 모든 위키 데이터가 정상적으로 복원되었습니다. (복원된 계정의 임시 비밀번호: reset1234!)');
+                        closeModals();
+                        logout();
+                    }
+                } catch (err) {
+                    alert('복구 실패: 유효한 NFC WIKI 보안 백업 파일(.json)이 아닙니다.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        /* ==========================================================================
+           4. 모달 및 회원 인증 로직
+           ========================================================================== */
+
+        function closeModals() {
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+        }
+        function openLoginModal() { document.getElementById('login-modal').style.display = 'flex'; }
+        function openSignupModal() { document.getElementById('signup-modal').style.display = 'flex'; }
+        
+        function openFindModal() {
+            closeModals();
+            setFindMode('id');
+            document.getElementById('find-modal').style.display = 'flex';
+        }
+
+        function setFindMode(mode) {
+            findMode = mode;
+            const idBtn = document.getElementById('find-mode-id-btn');
+            const pwBtn = document.getElementById('find-mode-pw-btn');
+            const findIdInput = document.getElementById('find-id');
+            const findNicknameInput = document.getElementById('find-nickname');
+            const newPwInput = document.getElementById('find-new-pw');
+            const actionBtn = document.getElementById('find-action-btn');
+
+            if (mode === 'id') {
+                idBtn.className = "btn btn-primary";
+                pwBtn.className = "btn btn-secondary";
+                findIdInput.style.display = 'none';
+                findNicknameInput.style.display = 'block';
+                newPwInput.style.display = 'none';
+                actionBtn.innerText = "아이디 찾기";
+            } else {
+                idBtn.className = "btn btn-secondary";
+                pwBtn.className = "btn btn-primary";
+                findIdInput.style.display = 'block';
+                findNicknameInput.style.display = 'none';
+                newPwInput.style.display = 'block';
+                actionBtn.innerText = "비밀번호 재설정";
+            }
+        }
+
+        async function processSignup() {
+            const id = document.getElementById('signup-id').value.trim();
+            const pw = document.getElementById('signup-pw').value.trim();
+            const nickname = document.getElementById('signup-nickname').value.trim();
+            const question = document.getElementById('signup-question').value.trim();
+            const answer = document.getElementById('signup-answer').value.trim();
+
+            if (!id || !pw || !nickname || !question || !answer) return alert('모든 항목을 올바르게 입력해주세요.');
+            if (id.length < 4) return alert('아이디는 4자 이상이어야 합니다.');
+            if (pw.length < 6) return alert('비밀번호는 6자 이상이어야 합니다.');
+            if (users.some(u => u.id === id)) return alert('이미 존재하는 아이디입니다.');
+
+            const salt = generateSalt();
+            const hashedPw = await hashPasswordPBKDF2(pw, salt);
+            const answerSalt = generateSalt();
+            const hashedAnswer = await hashPasswordPBKDF2(answer, answerSalt);
+
+            users.push({ 
+                id, 
+                pw: hashedPw, 
+                salt, 
+                nickname, 
+                question, 
+                answer: hashedAnswer, 
+                answerSalt, 
+                isAdmin: false, 
+                isBanned: false 
+            });
+            saveToStorage();
+            alert('회원가입이 완료되었습니다.');
+            closeModals();
+            openLoginModal();
+        }
+
+        async function processLogin() {
+            await validateSessionIntegrity();
+            const id = document.getElementById('login-id').value.trim();
+            const pw = document.getElementById('login-pw').value.trim();
+
+            const user = users.find(u => u.id === id);
+            if (!user) return alert('아이디 또는 비밀번호가 올바르지 않습니다.');
+
+            const inputHashed = await hashPasswordPBKDF2(pw, user.salt);
+            if (user.pw !== inputHashed) return alert('아이디 또는 비밀번호가 올바르지 않습니다.');
+
+            if (user.isBanned) return alert('⚠️ 해당 계정은 제재(차단) 상태입니다.');
+
+            currentUser = user;
+            isAnonymous = false;
+            localStorage.setItem('nfc_wiki_anon', false);
+            await saveToStorage();
+            
+            closeModals();
+            renderAll();
+        }
+
+        async function processFind() {
+            const answer = document.getElementById('find-answer').value.trim();
+            if (!answer) return alert('비밀번호 힌트 정답을 입력해주세요.');
+
+            if (findMode === 'id') {
+                const nickname = document.getElementById('find-nickname').value.trim();
+                const user = users.find(u => u.nickname === nickname);
+                if (user) {
+                    const hashedAns = await hashPasswordPBKDF2(answer, user.answerSalt);
+                    if (user.answer === hashedAns) {
+                        alert(`🎉 회원님의 아이디는 [ ${sanitizeHTML(user.id)} ] 입니다.`);
+                        closeModals();
+                        openLoginModal();
+                        return;
+                    }
+                }
+                alert('일치하는 회원 정보가 없거나 정답이 틀렸습니다.');
+            } else {
+                const id = document.getElementById('find-id').value.trim();
+                const newPw = document.getElementById('find-new-pw').value.trim();
+                if (!id || !newPw) return alert('아이디와 새 비밀번호를 입력해주세요.');
+                if (newPw.length < 6) return alert('새 비밀번호는 6자 이상이어야 합니다.');
+
+                const userIdx = users.findIndex(u => u.id === id);
+                if (userIdx !== -1) {
+                    const hashedAns = await hashPasswordPBKDF2(answer, users[userIdx].answerSalt);
+                    if (users[userIdx].answer === hashedAns) {
+                        const newSalt = generateSalt();
+                        users[userIdx].salt = newSalt;
+                        users[userIdx].pw = await hashPasswordPBKDF2(newPw, newSalt);
+                        saveToStorage();
+                        alert('🔑 비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 로그인해 주세요.');
+                        closeModals();
+                        openLoginModal();
+                        return;
+                    }
+                }
+                alert('일치하는 아이디가 없거나 힌트 정답이 올바르지 않습니다.');
+            }
+        }
+
+        function setAnonymous(status) {
+            isAnonymous = status;
+            if (status) { logout(); }
+            localStorage.setItem('nfc_wiki_anon', status);
+            renderAll();
+        }
+
+        function logout() {
+            currentUser = null;
+            isAnonymous = false;
+            localStorage.removeItem('nfc_wiki_session');
+            localStorage.removeItem('nfc_wiki_session_sig');
+            localStorage.removeItem('nfc_wiki_anon');
+            renderAll();
+        }
+
+        /* ==========================================================================
+           5. 관리자 권한 및 대시보드
+           ========================================================================== */
+
+        async function openAdminModal() {
+            await validateSessionIntegrity();
+            if (!currentUser || !currentUser.isAdmin) {
+                return alert('관리자만 접근할 수 있습니다.');
+            }
+            document.getElementById('admin-new-id').value = currentUser.id;
+            document.getElementById('admin-current-pw').value = '';
+            document.getElementById('admin-new-pw').value = '';
+
+            document.getElementById('setting-wiki-name').value = wikiSettings.name;
+            document.getElementById('setting-wiki-notice').value = wikiSettings.notice;
+            document.getElementById('setting-wiki-manual').value = wikiSettings.manual;
+            document.getElementById('setting-wiki-policy').value = wikiSettings.policy;
+            document.getElementById('setting-wiki-inquiry').value = wikiSettings.inquiry;
+            
+            document.getElementById('setting-allow-user-edit').checked = !!wikiSettings.allowUserEdit;
+            document.getElementById('setting-allow-user-delete').checked = !!wikiSettings.allowUserDelete;
+
+            renderAdminUserList();
+            document.getElementById('admin-modal').style.display = 'flex';
+        }
+
+        async function changeAdminCredentials() {
+            await validateSessionIntegrity();
+            if (!currentUser || !currentUser.isAdmin) return alert('권한이 없습니다.');
+
+            const newId = document.getElementById('admin-new-id').value.trim();
+            const currentPw = document.getElementById('admin-current-pw').value.trim();
+            const newPw = document.getElementById('admin-new-pw').value.trim();
+
+            if (!newId || !currentPw) return alert('새 아이디와 현재 비밀번호를 입력해주세요.');
+
+            const currentHashed = await hashPasswordPBKDF2(currentPw, currentUser.salt);
+            if (currentUser.pw !== currentHashed) return alert('현재 비밀번호가 일치하지 않습니다.');
+
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            if (userIndex !== -1) {
+                users[userIndex].id = newId;
+                if (newPw) {
+                    if (newPw.length < 6) return alert('새 비밀번호는 6자 이상이어야 합니다.');
+                    const newSalt = generateSalt();
+                    users[userIndex].salt = newSalt;
+                    users[userIndex].pw = await hashPasswordPBKDF2(newPw, newSalt);
+                }
+                currentUser = users[userIndex];
+                await saveToStorage();
+                alert('관리자 계정 정보가 변경되었습니다.');
+                closeModals();
+                renderAll();
+            }
+        }
+
+        function renderAdminUserList() {
+            const tbody = document.getElementById('admin-user-list');
+            tbody.innerHTML = '';
+
+            users.forEach((u, idx) => {
+                if (currentUser && u.id === currentUser.id) return;
+
+                const statusBadge = u.isAdmin ? `<span class="admin-badge">관리자</span>` : (u.isBanned ? `<span class="banned-badge">차단됨</span>` : `<span style="color:#059669; font-weight:bold;">일반회원</span>`);
+                const adminToggleBtn = u.isAdmin ? `<button class="btn btn-secondary" style="padding:2px 6px; font-size:0.75rem;" onclick="toggleAdminRole(${idx})">관리자 해제</button>` : `<button class="btn btn-primary" style="padding:2px 6px; font-size:0.75rem;" onclick="toggleAdminRole(${idx})">관리자 부여</button>`;
+                const banToggleBtn = u.isBanned ? `<button class="btn btn-secondary" style="padding:2px 6px; font-size:0.75rem;" onclick="toggleBanUser(${idx})">차단 해제</button>` : `<button class="btn btn-danger" style="padding:2px 6px; font-size:0.75rem;" onclick="toggleBanUser(${idx})">계정 차단</button>`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${sanitizeHTML(u.id)}</td>
+                        <td>${sanitizeHTML(u.nickname)}</td>
+                        <td>${statusBadge}</td>
+                        <td style="display:flex; gap:5px;">
+                            ${adminToggleBtn}
+                            ${banToggleBtn}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if (tbody.innerHTML === '') {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">관리 가능한 타 회원이 없습니다.</td></tr>`;
+            }
+        }
+
+        async function toggleAdminRole(idx) {
+            await validateSessionIntegrity();
+            if (!currentUser || !currentUser.isAdmin) return alert('권한이 없습니다.');
+            users[idx].isAdmin = !users[idx].isAdmin;
+            saveToStorage();
+            renderAdminUserList();
+        }
+
+        async function toggleBanUser(idx) {
+            await validateSessionIntegrity();
+            if (!currentUser || !currentUser.isAdmin) return alert('권한이 없습니다.');
+            users[idx].isBanned = !users[idx].isBanned;
+            saveToStorage();
+            renderAdminUserList();
+        }
+
+        async function saveWikiSettings() {
+            await validateSessionIntegrity();
+            if (!currentUser || !currentUser.isAdmin) return alert('권한이 없습니다.');
+
+            wikiSettings.name = document.getElementById('setting-wiki-name').value.trim();
+            wikiSettings.notice = document.getElementById('setting-wiki-notice').value.trim();
+            wikiSettings.manual = document.getElementById('setting-wiki-manual').value.trim();
+            wikiSettings.policy = document.getElementById('setting-wiki-policy').value.trim();
+            wikiSettings.inquiry = document.getElementById('setting-wiki-inquiry').value.trim();
+
+            wikiSettings.allowUserEdit = document.getElementById('setting-allow-user-edit').checked;
+            wikiSettings.allowUserDelete = document.getElementById('setting-allow-user-delete').checked;
+
+            saveToStorage();
+            alert('설정이 저장되었습니다.');
+            closeModals();
+            renderAll();
+        }
+
+        /* ==========================================================================
+           6. 위키 문서 파싱 및 화면 렌더링
+           ========================================================================== */
+
+        function parseWikiSyntax(md) {
+            if (!md) return '';
+            let lines = md.split('\n');
+            let parsedLines = [];
+
+            for (let line of lines) {
+                let trimmed = line.trim();
+
+                trimmed = sanitizeHTML(trimmed);
+
+                trimmed = trimmed.replace(/\[\[(.*?)\]\]/g, (match, p1) => {
+                    let parts = p1.split('|');
+                    let target = parts[0].trim();
+                    let label = parts[1] ? parts[1].trim() : target;
+
+                    if (target.toLowerCase().startsWith('javascript:') || target.toLowerCase().startsWith('vbscript:')) {
+                        return sanitizeHTML(label);
+                    }
+
+                    if (target.startsWith('data:image') || target.match(/\.(jpeg|jpg|gif|png)$/i)) {
+                        return `<br><img src="${target}" alt="${label}"><br>`;
+                    } else if (target.startsWith('http://') || target.startsWith('https://')) {
+                        return `<a href="${target}" target="_blank" rel="noopener noreferrer" class="external-link">${label} ↗</a>`;
+                    } else {
+                        return `<a onclick="navigateTo('${target.replace(/'/g, "\\'")}')" class="wiki-link">${label}</a>`;
+                    }
+                });
+
+                if (trimmed.startsWith('=') && trimmed.endsWith('=')) {
+                    let title = trimmed.replace(/=/g, '').trim();
+                    parsedLines.push(`<h1>${title}</h1>`);
+                } else if (trimmed === '') {
+                    parsedLines.push('<br>');
+                } else {
+                    parsedLines.push(`<p>${trimmed}</p>`);
+                }
+            }
+            return parsedLines.join('\n');
+        }
+
+        function goHome() {
+            currentPageKey = null;
+            isEditing = false;
+            currentTab = 'document';
+            renderAll();
+        }
+
+        function goBack() {
+            if (historyStack.length > 0) {
+                currentPageKey = historyStack.pop();
+                isEditing = false;
+                renderAll(false);
+            } else {
+                goHome();
+            }
+        }
+
+        function navigateTo(key, pushStack = true) {
+            if (currentPageKey !== key) {
+                if (currentPageKey !== null && pushStack) {
+                    historyStack.push(currentPageKey);
+                }
+                currentPageKey = key;
+                isEditing = false;
+                currentTab = 'document';
+
+                if (pages[key]) {
+                    pages[key].viewsToday = (pages[key].viewsToday || 0) + 1;
+                    saveToStorage();
+                }
+                renderAll(false);
+            }
+        }
+
+        async function createNewPage() {
+            await validateSessionIntegrity();
+            if (currentUser && currentUser.isBanned) return alert('⚠️ 제재된 계정은 문서 작성이 불가능합니다.');
+
+            if (!currentUser && !isAnonymous) {
+                setAnonymous(true);
+            }
+
+            const title = prompt('새 문서의 제목을 입력하세요:');
+            if (!title || !title.trim()) return;
+
+            const safeTitle = title.trim();
+            const key = safeTitle.replace(/\s+/g, '_');
+            if (pages[key]) return alert('이미 존재하는 문서 제목입니다.');
+
+            const initContent = `= ${safeTitle} =\n\n새로운 문서의 내용을 입력하세요.`;
+            const authorName = currentUser ? currentUser.nickname : `익명(${userIp})`;
+
+            pages[key] = {
+                title: safeTitle,
+                content: initContent,
+                updated: new Date().toISOString(),
+                viewsToday: 1,
+                isAnonDoc: !currentUser,
+                isProtected: false,
+                history: [{
+                    version: 1,
+                    author: authorName,
+                    date: new Date().toLocaleString(),
+                    content: initContent,
+                    summary: "문서 생성"
+                }]
+            };
+
+            saveToStorage();
+            navigateTo(key);
+            isEditing = true;
+            renderContent();
+        }
+
+        async function deletePage() {
+            await validateSessionIntegrity();
+            const page = pages[currentPageKey];
+            const isAdmin = currentUser && currentUser.isAdmin;
+
+            if (page.isProtected && !isAdmin) return alert('🔒 이 문서는 보호되어 있어 삭제할 수 없습니다.');
+            if (page.isAnonDoc && !isAdmin) return alert('⛔ 익명 작성 문서는 관리자만 삭제할 수 있습니다.');
+            if (!page.isAnonDoc && !isAdmin && !wikiSettings.allowUserDelete) return alert('⛔ 해당 문서는 삭제 권한이 제한되어 있습니다.');
+
+            if (Object.keys(pages).length <= 1) return alert('최소 1개 이상의 문서는 존재해야 합니다.');
+
+            if (confirm(`정말로 "${page.title}" 문서를 삭제하시겠습니까?`)) {
+                delete pages[currentPageKey];
+                saveToStorage();
+                alert('문서가 삭제되었습니다.');
+                goHome();
+            }
+        }
+
+        async function startEditing() {
+            await validateSessionIntegrity();
+            const page = pages[currentPageKey];
+            const isAdmin = currentUser && currentUser.isAdmin;
+
+            if (page.isProtected && !isAdmin) return alert('🔒 이 문서는 보호되어 있어 편집할 수 없습니다.');
+            if (!isAdmin && !wikiSettings.allowUserEdit) return alert('⛔ 문서 수정 권한이 비활성화되어 있습니다.');
+
+            isEditing = true;
+            renderContent();
+        }
+
+        async function savePage() {
+            await validateSessionIntegrity();
+            const page = pages[currentPageKey];
+            const isAdmin = currentUser && currentUser.isAdmin;
+
+            if (page.isProtected && !isAdmin) return alert('🔒 보호 문서입니다.');
+            if (!isAdmin && !wikiSettings.allowUserEdit) return alert('⛔ 권한이 없습니다.');
+
+            const newTitle = document.getElementById('edit-title').value.trim();
+            const newContent = document.getElementById('edit-content').value;
+            const isProtectedCheck = document.getElementById('edit-protected') ? document.getElementById('edit-protected').checked : page.isProtected;
+
+            const summaryText = prompt('편집 요약을 입력하세요:', '문서 내용 수정') || '문서 내용 수정';
+            if (!newTitle) return alert('문서 제목을 입력해주세요.');
+
+            const newKey = newTitle.replace(/\s+/g, '_');
+            if (newKey !== currentPageKey) {
+                delete pages[currentPageKey];
+                currentPageKey = newKey;
+            }
+
+            const authorName = currentUser ? currentUser.nickname : `익명(${userIp})`;
+            if (!pages[currentPageKey]) pages[currentPageKey] = {};
+            if (!pages[currentPageKey].history) pages[currentPageKey].history = [];
+
+            const nextVersion = pages[currentPageKey].history.length + 1;
+
+            pages[currentPageKey].history.unshift({
+                version: nextVersion,
+                author: authorName,
+                date: new Date().toLocaleString(),
+                content: newContent,
+                summary: summaryText
+            });
+
+            pages[currentPageKey].title = newTitle;
+            pages[currentPageKey].content = newContent;
+            pages[currentPageKey].isProtected = isProtectedCheck;
+            pages[currentPageKey].updated = new Date().toISOString();
+
+            saveToStorage();
+            isEditing = false;
+            renderContent();
+        }
+
+        function uploadImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) return alert('이미지 파일만 업로드 가능합니다.');
+            if (file.size > 3 * 1024 * 1024) return alert('이미지 크기는 3MB 이하만 가능합니다.');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Image = e.target.result;
+                const textarea = document.getElementById('edit-content');
+                textarea.value += `\n[[${base64Image}|업로드 이미지]]\n`;
+                alert('이미지가 첨부되었습니다.');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function restoreVersion(idx) {
+            await validateSessionIntegrity();
+            const page = pages[currentPageKey];
+            const isAdmin = currentUser && currentUser.isAdmin;
+
+            if (!isAdmin) return alert('⛔ 이전 버전 복원은 오직 관리자만 실행할 수 있습니다.');
+            if (!confirm('이 과거 버전으로 문서를 복원하시겠습니까?')) return;
+
+            const histItem = page.history[idx];
+            const summaryText = prompt('복원 이유를 입력하세요:', `버전 ${histItem.version} 복원`) || `버전 ${histItem.version} 복원`;
+
+            page.history.unshift({
+                version: page.history.length + 1,
+                author: currentUser.nickname,
+                date: new Date().toLocaleString(),
+                content: histItem.content,
+                summary: summaryText
+            });
+
+            page.content = histItem.content;
+            page.updated = new Date().toISOString();
+
+            saveToStorage();
+            alert('성공적으로 이전 버전으로 복원되었습니다.');
+            renderContent();
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('tab-doc-btn').className = `tab-btn ${tab === 'document' ? 'active' : ''}`;
+            document.getElementById('tab-hist-btn').className = `tab-btn ${tab === 'history' ? 'active' : ''}`;
+            renderContent();
+        }
+
+        function openSpecialModal(type) {
+            const titleEl = document.getElementById('special-modal-title');
+            const bodyEl = document.getElementById('special-modal-body');
+            
+            if (type === 'manual') {
+                titleEl.innerText = "📖 매뉴얼 및 기능 소개";
+                bodyEl.innerHTML = parseWikiSyntax(wikiSettings.manual);
+            } else if (type === 'policy') {
+                titleEl.innerText = "📜 이용 방침 (상세 규정)";
+                bodyEl.innerHTML = parseWikiSyntax(wikiSettings.policy);
+            } else if (type === 'inquiry') {
+                titleEl.innerText = "📞 문의 및 신고 센터";
+                bodyEl.innerHTML = parseWikiSyntax(wikiSettings.inquiry);
+            }
+            document.getElementById('special-modal').style.display = 'flex';
+        }
+
+        function renderTopBar() {
+            document.getElementById('wiki-page-title').innerText = wikiSettings.name;
+            document.getElementById('wiki-title-sidebar').innerText = wikiSettings.name;
+            document.getElementById('footer-wiki-name').innerText = wikiSettings.name;
+
+            const userSection = document.getElementById('user-section');
+            if (currentUser) {
+                const badge = currentUser.isAdmin ? `<span class="admin-badge" style="margin-left:5px;">관리자</span>` : '';
+                let adminBtn = currentUser.isAdmin ? `<button class="btn btn-admin" onclick="openAdminModal()">⚙️ 관리자 대시보드</button>` : '';
+                userSection.innerHTML = `${adminBtn} <span>👤 <b>${sanitizeHTML(currentUser.nickname)}</b>님${badge}</span> <button class="btn btn-secondary" onclick="logout()">로그아웃</button>`;
+            } else if (isAnonymous) {
+                userSection.innerHTML = `<span>🕵️ <b>익명</b> <span class="ip-tag">${userIp}</span></span> <button class="btn btn-secondary" onclick="logout()">전환</button>`;
+            } else {
+                userSection.innerHTML = `
+                    <button class="btn btn-primary" onclick="openLoginModal()">로그인</button>
+                    <button class="btn btn-secondary" onclick="openSignupModal()">회원가입</button>
+                    <button class="btn btn-secondary" onclick="setAnonymous(true)">익명</button>
+                `;
+            }
+        }
+
+        function renderContent() {
+            const actionButtons = document.getElementById('action-buttons');
+            const contentEl = document.getElementById('content-container');
+            const tabsEl = document.getElementById('wiki-tabs');
+
+            if (currentPageKey === null) {
+                tabsEl.style.display = 'none';
+                actionButtons.innerHTML = `<button class="btn btn-primary" onclick="createNewPage()">+ 새 문서 만들기</button>`;
+                
+                let noticeHtml = parseWikiSyntax(wikiSettings.notice);
+
+                let sortedPages = Object.keys(pages).map(k => ({
+                    key: k,
+                    title: pages[k].title,
+                    views: pages[k].viewsToday || 0
+                })).sort((a, b) => b.views - a.views);
+
+                let rankingHtml = '';
+                sortedPages.slice(0, 5).forEach((p, idx) => {
+                    rankingHtml += `
+                        <li class="ranking-item" style="cursor:pointer;" onclick="navigateTo('${p.key.replace(/'/g, "\\'")}')">
+                            <span><b>${idx+1}.</b> ${sanitizeHTML(p.title)}</span>
+                            <span class="ip-tag">${p.views}회</span>
+                        </li>
+                    `;
+                });
+
+                let recentPages = Object.keys(pages).map(k => ({
+                    key: k,
+                    title: pages[k].title,
+                    updated: pages[k].updated
+                })).sort((a, b) => new Date(b.updated) - new Date(a.updated));
+
+                let recentHtml = '';
+                recentPages.slice(0, 5).forEach((p) => {
+                    const timeStr = new Date(p.updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    recentHtml += `
+                        <li class="ranking-item" style="cursor:pointer;" onclick="navigateTo('${p.key.replace(/'/g, "\\'")}')">
+                            <span>📄 ${sanitizeHTML(p.title)}</span>
+                            <span class="ip-tag">${timeStr}</span>
+                        </li>
+                    `;
+                });
+
+                let searchRankList = Object.keys(searchRankings).map(k => ({
+                    keyword: k,
+                    count: searchRankings[k]
+                })).sort((a, b) => b.count - a.count);
+
+                let searchRankHtml = '';
+                if (searchRankList.length > 0) {
+                    searchRankList.slice(0, 5).forEach((s, idx) => {
+                        searchRankHtml += `
+                            <li class="ranking-item">
+                                <span><b>${idx+1}.</b> ${sanitizeHTML(s.keyword)}</span>
+                                <span class="ip-tag">${s.count}회</span>
+                            </li>
+                        `;
+                    });
+                } else {
+                    searchRankHtml = `<li class="ranking-item" style="color:#94a3b8;">검색 내역이 없습니다.</li>`;
+                }
+
+                contentEl.innerHTML = `
+                    <div style="margin-bottom: 20px;">
+                        <h1 style="color:var(--primary-color); margin-bottom: 5px;">📡 ${sanitizeHTML(wikiSettings.name)} 대문</h1>
+                        <p style="color:#64748b; margin-top:0;">누구나 기여할 수 있는 프리미엄 지식 보관소입니다.</p>
+                    </div>
+                    <div class="main-portal">
+                        <div class="portal-card">
+                            <h3>📢 공지사항</h3>
+                            <div style="font-size:0.9rem; line-height:1.6; color:#334155;">${noticeHtml}</div>
+                            <h3 style="margin-top:20px;">🔍 실시간 인기 검색어</h3>
+                            <ul class="ranking-list">${searchRankHtml}</ul>
+                        </div>
+                        <div class="portal-card">
+                            <h3>🔥 오늘의 실시간 인기 문서</h3>
+                            <ul class="ranking-list">${rankingHtml}</ul>
+                        </div>
+                        <div class="portal-card">
+                            <h3>🕒 최근 변경된 문서</h3>
+                            <ul class="ranking-list">${recentHtml}</ul>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            tabsEl.style.display = 'flex';
+            const page = pages[currentPageKey];
+            const isAdmin = currentUser && currentUser.isAdmin;
+
+            if (currentTab === 'document') {
+                if (isEditing) {
+                    actionButtons.innerHTML = `
+                        <button class="btn btn-secondary" onclick="isEditing=false; renderContent();">취소</button>
+                        <button class="btn btn-primary" onclick="savePage()">저장</button>
+                    `;
+
+                    let adminOptionHtml = isAdmin ? `
+                        <div style="margin-bottom: 15px; background: #fffbebf8; border: 1px solid #fef3c7; padding: 10px; border-radius: 6px;">
+                            <label style="font-size:0.88rem; font-weight:bold; cursor:pointer; color:#b45309; display:flex; align-items:center; gap:8px;">
+                                <input type="checkbox" id="edit-protected" ${page.isProtected ? 'checked' : ''} style="width:auto; margin:0;">
+                                🔒 관리자만 편집 가능한 문서로 설정 (문서 보호)
+                            </label>
+                        </div>
+                    ` : '';
+
+                    contentEl.innerHTML = `
+                        <input type="text" id="edit-title" value="${sanitizeHTML(page.title)}" placeholder="문서 제목" maxlength="100">
+                        ${adminOptionHtml}
+                        <div class="image-upload-box">
+                            <label style="font-size:0.85rem; font-weight:bold; cursor:pointer;">
+                                🖼️ 내 컴퓨터에서 이미지 파일 업로드 (최대 3MB)
+                                <input type="file" accept="image/*" onchange="uploadImage(event)" style="display:none;">
+                            </label>
+                        </div>
+                        <textarea id="edit-content" placeholder="문서 내용을 입력하세요...">${sanitizeHTML(page.content)}</textarea>
+                    `;
+                } else {
+                    actionButtons.innerHTML = `
+                        <button class="btn btn-danger" onclick="deletePage()">🗑️ 문서 삭제</button>
+                        <button class="btn btn-primary" onclick="startEditing()">✏️ 편집</button>
+                    `;
+
+                    let protectedBadgeHtml = page.isProtected ? `<span class="protected-badge">🔒 보호 문서</span>` : '';
+
+                    contentEl.innerHTML = `
+                        <div class="wiki-view">
+                            <h1>${sanitizeHTML(page.title)} ${protectedBadgeHtml}</h1>
+                            <div>${parseWikiSyntax(page.content)}</div>
+                        </div>
+                    `;
+                }
+            } else if (currentTab === 'history') {
+                actionButtons.innerHTML = '';
+                let histHtml = `<h3>📜 문서 변경 역사 (버전 기록)</h3>`;
+                if (page.history && page.history.length > 0) {
+                    page.history.forEach((h, idx) => {
+                        let restoreBtnHtml = isAdmin 
+                            ? `<button class="btn btn-secondary" style="float:right; padding:2px 8px; font-size:0.75rem;" onclick="restoreVersion(${idx})">이 버전으로 복원</button>`
+                            : `<span style="float:right; font-size:0.75rem; color:#94a3b8;">(관리자 전용 복원)</span>`;
+
+                        histHtml += `
+                            <div class="history-item">
+                                <b>버전 ${h.version}</b> | 기여자: ${sanitizeHTML(h.author)} | 수정일시: ${sanitizeHTML(h.date)}<br>
+                                <span style="color:#64748b;">요약: ${sanitizeHTML(h.summary)}</span>
+                                ${restoreBtnHtml}
+                            </div>
+                        `;
+                    });
+                } else {
+                    histHtml += `<p style="color:#64748b;">기록이 없습니다.</p>`;
+                }
+                contentEl.innerHTML = histHtml;
+            }
+        }
+
+        function handleSearch(event) {
+            const query = event.target.value.trim().toLowerCase();
+            const resultsBox = document.getElementById('search-results-box');
+            
+            if (!query) {
+                resultsBox.style.display = 'none';
+                resultsBox.innerHTML = '';
+                return;
+            }
+
+            searchRankings[query] = (searchRankings[query] || 0) + 1;
+            saveToStorage();
+
+            let matches = [];
+            for (const key in pages) {
+                if (pages[key].title.toLowerCase().includes(query)) {
+                    matches.push({ key, title: pages[key].title });
+                }
+            }
+
+            if (matches.length > 0) {
+                resultsBox.innerHTML = matches.map(m => `<div class="search-item" onclick="selectSearchResult('${m.key.replace(/'/g, "\\'")}')">${sanitizeHTML(m.title)}</div>`).join('');
+                resultsBox.style.display = 'block';
+            } else {
+                resultsBox.innerHTML = `<div class="search-item" style="color:#94a3b8; cursor:default;">검색 결과가 없습니다.</div>`;
+                resultsBox.style.display = 'block';
+            }
+        }
+
+        function selectSearchResult(key) {
+            document.getElementById('wiki-search-input').value = '';
+            document.getElementById('search-results-box').style.display = 'none';
+            navigateTo(key);
+        }
+
+        async function renderAll() {
+            await initAdmin();
+            renderTopBar();
+            renderContent();
+        }
+
+        renderAll();
+    </script>
+</body>
+</html>
